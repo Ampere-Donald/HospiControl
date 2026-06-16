@@ -1,0 +1,126 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  SUPER_ADMIN
+  ADMIN_HOPITAL
+  MEDECIN
+  ACCUEIL
+}
+
+enum Sexe {
+  M
+  F
+}
+
+enum TypeAntecedent {
+  MEDICAL
+  CHIRURGICAL
+  FAMILIAL
+  ALLERGIE
+}
+
+enum StatutConsentement {
+  AUTORISE
+  REVOQUE
+}
+
+model Hopital {
+  id            String         @id @default(cuid())
+  nom           String
+  ville         String
+  type          String?
+  telephone     String?
+  actif         Boolean        @default(true)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  utilisateurs  Utilisateur[]
+  consultations Consultation[]
+  consentements Consentement[]
+  antecedents   Antecedent[]
+}
+
+model Utilisateur {
+  id             String         @id @default(cuid())
+  nom            String
+  prenom         String
+  email          String         @unique
+  telephone      String?
+  motDePasseHash String
+  role           Role
+  hopitalId      String?
+  hopital        Hopital?       @relation(fields: [hopitalId], references: [id])
+  createdAt      DateTime       @default(now())
+  consultations  Consultation[]
+}
+
+model Patient {
+  id            String         @id @default(cuid())
+  telephone     String         @unique
+  nom           String
+  prenom        String
+  dateNaissance DateTime?
+  sexe          Sexe?
+  groupeSanguin String?
+  adresse       String?
+  createdAt     DateTime       @default(now())
+  antecedents   Antecedent[]
+  consultations Consultation[]
+  consentements Consentement[]
+}
+
+model Consentement {
+  id               String             @id @default(cuid())
+  patientId        String
+  patient          Patient            @relation(fields: [patientId], references: [id])
+  hopitalId        String
+  hopital          Hopital            @relation(fields: [hopitalId], references: [id])
+  statut           StatutConsentement @default(AUTORISE)
+  dateModification DateTime           @default(now()) @updatedAt
+
+  @@unique([patientId, hopitalId])
+}
+
+model Antecedent {
+  id                String         @id @default(cuid())
+  patientId         String
+  patient           Patient        @relation(fields: [patientId], references: [id])
+  type              TypeAntecedent
+  description       String
+  date              DateTime?
+  hopitalCreateurId String
+  hopitalCreateur   Hopital        @relation(fields: [hopitalCreateurId], references: [id])
+  createdAt         DateTime       @default(now())
+}
+
+model Consultation {
+  id            String         @id @default(cuid())
+  patientId     String
+  patient       Patient        @relation(fields: [patientId], references: [id])
+  hopitalId     String
+  hopital       Hopital        @relation(fields: [hopitalId], references: [id])
+  medecinId     String
+  medecin       Utilisateur    @relation(fields: [medecinId], references: [id])
+  date          DateTime       @default(now())
+  motif         String
+  diagnostic    String?
+  notes         String?
+  prescriptions Prescription[]
+  createdAt     DateTime       @default(now())
+}
+
+model Prescription {
+  id             String       @id @default(cuid())
+  consultationId String
+  consultation   Consultation @relation(fields: [consultationId], references: [id])
+  medicament     String
+  posologie      String
+  duree          String?
+  createdAt      DateTime     @default(now())
+}
