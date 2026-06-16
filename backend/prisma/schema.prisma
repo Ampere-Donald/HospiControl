@@ -44,6 +44,7 @@ model Hopital {
   consultations Consultation[]
   consentements Consentement[]
   antecedents   Antecedent[]
+  patients      Patient[]
 }
 
 model Utilisateur {
@@ -68,9 +69,11 @@ model Patient {
   dateNaissance DateTime?
   sexe          Sexe?
   groupeSanguin String?
-  adresse       String?
-  createdAt     DateTime       @default(now())
-  antecedents   Antecedent[]
+  adresse           String?
+  hopitalCreateurId String?
+  hopitalCreateur   Hopital?       @relation(fields: [hopitalCreateurId], references: [id])
+  createdAt         DateTime       @default(now())
+  antecedents       Antecedent[]
   consultations Consultation[]
   consentements Consentement[]
 }
