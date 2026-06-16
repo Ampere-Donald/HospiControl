@@ -1,26 +1,32 @@
 @import "tailwindcss";
 
+/* Palette HospiControl — d'après les maquettes (teal médical + ambre). */
+@theme {
+  --color-brand: #0e8a78;          /* teal principal : logo, boutons */
+  --color-brand-dark: #0a6e5f;     /* hover */
+  --color-brand-light: #e6f4f1;    /* fonds teintés */
+  --color-brand-deep: #0a3b35;     /* panneau sombre du login (le + foncé) */
+  --color-brand-forest: #0f5048;   /* dégradé du panneau sombre */
+  --color-accent: #d99a2b;         /* ambre : connecteurs, statut « en attente » */
+
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --background: #f4f7f6;
+  --foreground: #0e1c19;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+}
+
+/* Grille subtile en arrière-plan (page de connexion). */
+.bg-grid {
+  background-image:
+    linear-gradient(to right, rgba(13, 80, 72, 0.045) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(13, 80, 72, 0.045) 1px, transparent 1px);
+  background-size: 34px 34px;
 }
