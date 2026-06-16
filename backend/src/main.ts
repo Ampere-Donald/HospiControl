@@ -5,9 +5,13 @@ import { AppModule } from './app.module';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  // Le frontend (Next.js) appelle l'API depuis un autre port -> CORS.
-  // En dev on reflète l'origine ; à restreindre en production.
-  app.enableCors({ origin: true });
+  // CORS : en dev (FRONTEND_URL absent) on reflète l'origine ; en production on
+  // restreint à FRONTEND_URL (une ou plusieurs origines séparées par des virgules).
+  app.enableCors({
+    origin: process.env.FRONTEND_URL
+      ? process.env.FRONTEND_URL.split(',').map((o) => o.trim())
+      : true,
+  });
 
   // Validation automatique des DTO : on retire les champs non déclarés.
   app.useGlobalPipes(

@@ -138,6 +138,67 @@ async function main() {
   });
   console.log(`✓ Accueil Hôpital B: ${accueilB.email}`);
 
+  // --- Données de démonstration : patient « Jean » créé par l'Hôpital A ---
+  // Sert à dérouler le scénario de partage A -> B. AUCUN consentement n'est créé
+  // ici : la démo part propre (l'Hôpital B ne voit rien tant que l'accueil n'a
+  // pas autorisé le partage).
+  const jean = await prisma.patient.upsert({
+    where: { telephone: '699112233' },
+    update: {},
+    create: {
+      id: 'patient-jean',
+      telephone: '699112233',
+      nom: 'Nguoa',
+      prenom: 'Jean Pierre',
+      dateNaissance: new Date('1984-08-12'),
+      sexe: 'M',
+      groupeSanguin: 'O+',
+      adresse: 'Bonamoussadi, Douala',
+      hopitalCreateurId: hopitalA.id,
+    },
+  });
+  console.log(`✓ Patient démo: ${jean.prenom} ${jean.nom} (${jean.telephone})`);
+
+  // Antécédent (allergie) saisi par l'Hôpital A
+  await prisma.antecedent.upsert({
+    where: { id: 'ant-jean-penicilline' },
+    update: {},
+    create: {
+      id: 'ant-jean-penicilline',
+      patientId: jean.id,
+      type: 'ALLERGIE',
+      description: 'Allergie à la pénicilline',
+      hopitalCreateurId: hopitalA.id,
+    },
+  });
+
+  // Consultation + prescription créées par le médecin de l'Hôpital A.
+  // Cas cohérent : patient allergique à la pénicilline -> antibiotique adapté.
+  await prisma.consultation.upsert({
+    where: { id: 'cons-jean-bronchite' },
+    update: {},
+    create: {
+      id: 'cons-jean-bronchite',
+      patientId: jean.id,
+      hopitalId: hopitalA.id,
+      medecinId: medecinA.id,
+      motif: 'Toux et fièvre depuis 3 jours',
+      diagnostic: 'Bronchite aiguë',
+      notes: 'Patient allergique à la pénicilline — antibiotique adapté prescrit.',
+      prescriptions: {
+        create: [
+          {
+            id: 'presc-jean-azithro',
+            medicament: 'Azithromycine',
+            posologie: '250 mg, 1×/jour',
+            duree: '3 jours',
+          },
+        ],
+      },
+    },
+  });
+  console.log('✓ Carnet démo: 1 antécédent + 1 consultation (Hôpital A)');
+
   console.log('\nSeed terminé avec succès ✅');
   console.log('\nComptes de démo :');
   console.log('  Super Admin  : admin@carnet-medical.cm  / Admin1234!');

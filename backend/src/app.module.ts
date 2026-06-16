@@ -8,6 +8,7 @@ import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { RolesGuard } from './auth/guards/roles.guard';
 import { CarnetModule } from './carnet/carnet.module';
 import { ConsentementsModule } from './consentements/consentements.module';
+import { DashboardModule } from './dashboard/dashboard.module';
 import { HopitauxModule } from './hopitaux/hopitaux.module';
 import { PatientsModule } from './patients/patients.module';
 import { PrismaModule } from './prisma/prisma.module';
@@ -23,6 +24,7 @@ import { UtilisateursModule } from './utilisateurs/utilisateurs.module';
     PatientsModule,
     CarnetModule,
     ConsentementsModule,
+    DashboardModule,
   ],
   controllers: [AppController],
   providers: [

@@ -130,3 +130,35 @@ export interface ConsentementStatut {
   autorise: boolean;
   dateModification: string | null;
 }
+
+/** Agrégats du tableau de bord (GET /dashboard). */
+export interface DashboardData {
+  stats: {
+    totalPatients: number;
+    consultations: number;
+    consultationsAujourdhui: number;
+    prescriptions: number;
+    consentementsActifs: number;
+    consentementsRevoques: number;
+  };
+  patientsRecents: {
+    id: string;
+    nom: string;
+    prenom: string;
+    telephone: string;
+    origine: string | null;
+    createdAt: string;
+  }[];
+  consultationsRecentes: {
+    id: string;
+    date: string;
+    motif: string;
+    patient: { nom: string; prenom: string; telephone: string };
+  }[];
+  consentements: {
+    id: string;
+    statut: StatutConsentement;
+    dateModification: string;
+    patient: { nom: string; prenom: string; telephone: string };
+  }[];
+}

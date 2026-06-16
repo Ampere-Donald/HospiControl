@@ -39,6 +39,17 @@ export async function apiFetch<T>(
   const res = await fetch(`${API_URL}${path}`, { ...options, headers });
 
   if (!res.ok) {
+    // Token expiré/invalide sur une requête authentifiée -> déconnexion propre.
+    if (
+      res.status === 401 &&
+      token &&
+      typeof window !== 'undefined' &&
+      window.location.pathname !== '/login'
+    ) {
+      clearToken();
+      window.location.href = '/login';
+    }
+
     let message = 'Une erreur est survenue. Réessayez.';
     try {
       const data = await res.json();
