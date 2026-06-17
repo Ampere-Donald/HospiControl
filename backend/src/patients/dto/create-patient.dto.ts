@@ -35,4 +35,12 @@ export class CreatePatientDto {
   @IsOptional()
   @IsString()
   adresse?: string;
+
+  @IsOptional()
+  @IsString()
+  cni?: string;
+
+  @IsOptional()
+  @IsString()
+  tuteurId?: string;
 }

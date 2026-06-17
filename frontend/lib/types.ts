@@ -74,6 +74,8 @@ export interface Patient {
   adresse?: string | null;
   hopitalCreateurId?: string | null;
   hopitalCreateur?: { id: string; nom: string; ville: string } | null;
+  cni?: string | null;
+  tuteur?: { id: string; nom: string; prenom: string; telephone: string } | null;
   createdAt: string;
 }
 

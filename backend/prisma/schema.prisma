@@ -73,10 +73,16 @@ model Patient {
   adresse           String?
   hopitalCreateurId String?
   hopitalCreateur   Hopital?       @relation(fields: [hopitalCreateurId], references: [id])
+  cni               String?
+  tuteurId          String?
+  tuteur            Patient?       @relation("Tuteur", fields: [tuteurId], references: [id])
+  pupilles          Patient[]      @relation("Tuteur")
   createdAt         DateTime       @default(now())
   antecedents       Antecedent[]
   consultations Consultation[]
   consentements Consentement[]
+
+  @@index([cni])
 }
 
 model Consentement {

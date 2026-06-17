@@ -12,6 +12,7 @@ import { UpdatePatientDto } from './dto/update-patient.dto';
 // Origine du dossier (hôpital créateur) renvoyée avec le patient.
 const AVEC_ORIGINE = {
   hopitalCreateur: { select: { id: true, nom: true, ville: true } },
+  tuteur: { select: { id: true, nom: true, prenom: true, telephone: true } },
 };
 
 @Injectable()
@@ -42,6 +43,14 @@ export class PatientsService {
     if (existant) {
       throw new ConflictException('Un patient avec ce numéro existe déjà.');
     }
+    if (dto.cni) {
+      const memeCni = await this.prisma.patient.findFirst({
+        where: { cni: dto.cni },
+      });
+      if (memeCni) {
+        throw new ConflictException('Un patient avec cette CNI existe déjà.');
+      }
+    }
     return this.prisma.patient.create({
       data: {
         telephone: cle,
@@ -51,6 +60,8 @@ export class PatientsService {
         sexe: dto.sexe,
         groupeSanguin: dto.groupeSanguin,
         adresse: dto.adresse,
+        cni: dto.cni,
+        tuteurId: dto.tuteurId,
         hopitalCreateurId: hopitalId ?? undefined,
       },
       include: AVEC_ORIGINE,
@@ -77,6 +88,7 @@ export class PatientsService {
         sexe: dto.sexe,
         groupeSanguin: dto.groupeSanguin,
         adresse: dto.adresse,
+        cni: dto.cni,
       },
       include: AVEC_ORIGINE,
     });

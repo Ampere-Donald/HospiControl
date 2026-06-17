@@ -34,4 +34,8 @@ export class UpdatePatientDto {
   @IsOptional()
   @IsString()
   adresse?: string;
+
+  @IsOptional()
+  @IsString()
+  cni?: string;
 }

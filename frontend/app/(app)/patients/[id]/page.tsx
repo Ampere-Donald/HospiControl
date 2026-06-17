@@ -55,6 +55,7 @@ export default function FichePatientPage({
     sexe: '',
     groupeSanguin: '',
     adresse: '',
+    cni: '',
   });
   const [envoi, setEnvoi] = useState(false);
   const [erreur, setErreur] = useState('');
@@ -98,6 +99,7 @@ export default function FichePatientPage({
       sexe: patient.sexe ?? '',
       groupeSanguin: patient.groupeSanguin ?? '',
       adresse: patient.adresse ?? '',
+      cni: patient.cni ?? '',
     });
     setErreur('');
     setOuvert(true);
@@ -116,6 +118,7 @@ export default function FichePatientPage({
           sexe: form.sexe || undefined,
           groupeSanguin: form.groupeSanguin || undefined,
           adresse: form.adresse || undefined,
+          cni: form.cni || undefined,
         }),
       });
       setOuvert(false);
@@ -180,6 +183,7 @@ export default function FichePatientPage({
             <Info icon={User} label="Sexe" valeur={patient.sexe ? (patient.sexe === 'M' ? 'Masculin' : 'Féminin') : '—'} />
             <Info icon={Droplet} label="Groupe sanguin" valeur={patient.groupeSanguin ?? '—'} />
             <Info icon={MapPin} label="Adresse" valeur={patient.adresse ?? '—'} />
+            <Info icon={BadgeCheck} label="CNI" valeur={patient.cni ?? '—'} />
           </dl>
         </div>
 
@@ -260,6 +264,7 @@ export default function FichePatientPage({
             <SelectField label="Groupe sanguin" value={form.groupeSanguin} onChange={(v) => champ('groupeSanguin', v)} options={GROUPE_OPTIONS} />
           </div>
           <Field label="Adresse" value={form.adresse} onChange={(v) => champ('adresse', v)} />
+          <Field label="CNI (optionnel)" value={form.cni} onChange={(v) => champ('cni', v)} />
 
           {erreur && (
             <div className="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600">

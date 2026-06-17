@@ -36,6 +36,7 @@ const FORM_VIDE = {
   sexe: '',
   groupeSanguin: '',
   adresse: '',
+  cni: '',
 };
 
 const SEXE_OPTIONS = [
@@ -133,6 +134,7 @@ export default function PatientsPage() {
           sexe: form.sexe || undefined,
           groupeSanguin: form.groupeSanguin || undefined,
           adresse: form.adresse || undefined,
+          cni: form.cni || undefined,
         }),
       });
       router.push(`/patients/${cree.id}`);
@@ -292,6 +294,7 @@ export default function PatientsPage() {
             <SelectField label="Groupe sanguin" value={form.groupeSanguin} onChange={(v) => champ('groupeSanguin', v)} options={GROUPE_OPTIONS} />
           </div>
           <Field label="Adresse" value={form.adresse} onChange={(v) => champ('adresse', v)} placeholder="Quartier, ville" />
+          <Field label="CNI (optionnel)" value={form.cni} onChange={(v) => champ('cni', v)} placeholder="N° de carte d'identité" />
 
           {erreur && (
             <div className="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600">
