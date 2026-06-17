@@ -38,6 +38,11 @@ export class CarnetController {
     return this.carnet.ajouterConsultation(patientId, dto, user);
   }
 
+  @Get('consultations/mes')
+  mesConsultations(@CurrentUser() user: AuthUser) {
+    return this.carnet.mesConsultations(user);
+  }
+
   @Get('consultations/:id')
   detailConsultation(@Param('id') id: string, @CurrentUser() user: AuthUser) {
     return this.carnet.detailConsultation(id, user);

@@ -2,10 +2,8 @@ import {
   Building2,
   ClipboardList,
   Globe,
-  HeartPulse,
   LayoutDashboard,
   Settings,
-  ShieldCheck,
   Users,
   type LucideIcon,
 } from 'lucide-react';
@@ -27,6 +25,8 @@ interface RoleConfig {
 /*
  * Source unique de l'expérience par rôle (cf. maquette « Navigation par rôle »).
  * La redirection post-connexion ET la sidebar en découlent.
+ * - L'admin est administratif (pas d'accès clinique : ni Patients, ni Carnet).
+ * - Le médecin ne gère pas le consentement (saisi par l'accueil) : il en voit le statut dans le carnet.
  */
 export const ROLE_CONFIG: Record<Role, RoleConfig> = {
   SUPER_ADMIN: {
@@ -41,8 +41,6 @@ export const ROLE_CONFIG: Record<Role, RoleConfig> = {
     redirect: '/utilisateurs',
     nav: [
       { label: 'Utilisateurs', href: '/utilisateurs', icon: Users },
-      { label: 'Patients', href: '/patients', icon: HeartPulse },
-      { label: 'Carnet médical', href: '/carnet', icon: ClipboardList },
       { label: 'Paramètres', href: '/parametres', icon: Settings },
     ],
   },
@@ -51,8 +49,7 @@ export const ROLE_CONFIG: Record<Role, RoleConfig> = {
     nav: [
       { label: 'Tableau de bord', href: '/dashboard', icon: LayoutDashboard },
       { label: 'Patients', href: '/patients', icon: Users },
-      { label: 'Consultations', href: '/consultations', icon: ClipboardList },
-      { label: 'Consentements', href: '/consentements', icon: ShieldCheck },
+      { label: 'Mes consultations', href: '/consultations', icon: ClipboardList },
     ],
   },
   ACCUEIL: {
@@ -60,7 +57,6 @@ export const ROLE_CONFIG: Record<Role, RoleConfig> = {
     nav: [
       { label: 'Tableau de bord', href: '/dashboard', icon: LayoutDashboard },
       { label: 'Patients', href: '/patients', icon: Users },
-      { label: 'Consultations', href: '/consultations', icon: ClipboardList },
     ],
   },
 };

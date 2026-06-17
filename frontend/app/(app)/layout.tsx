@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
 import { FullScreenLoader } from '@/components/loader';
 import { AppSidebar } from '@/components/app-sidebar';
@@ -11,11 +11,20 @@ import { AppTopbar } from '@/components/app-topbar';
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
-    if (!loading && !user) router.replace('/login');
-  }, [user, loading, router]);
+    if (loading) return;
+    if (!user) {
+      router.replace('/login');
+      return;
+    }
+    // Forcer le changement du mot de passe temporaire à la 1ère connexion.
+    if (user.mustChangePassword && pathname !== '/parametres') {
+      router.replace('/parametres');
+    }
+  }, [user, loading, router, pathname]);
 
   if (loading || !user) return <FullScreenLoader />;
 

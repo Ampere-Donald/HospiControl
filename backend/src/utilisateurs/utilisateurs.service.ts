@@ -36,6 +36,7 @@ export class UtilisateursService {
         role: dto.role,
         hopitalId,
         motDePasseHash,
+        mustChangePassword: true,
       },
       omit: { motDePasseHash: true },
     });

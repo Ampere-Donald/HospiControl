@@ -18,6 +18,7 @@ export interface User {
   role: Role;
   hopitalId: string | null;
   hopital?: Hopital | null;
+  mustChangePassword?: boolean;
   createdAt: string;
 }
 

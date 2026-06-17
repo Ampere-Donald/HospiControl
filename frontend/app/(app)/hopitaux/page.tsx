@@ -11,6 +11,7 @@ import {
   Power,
   Search,
   ShieldCheck,
+  Trash2,
   XCircle,
 } from 'lucide-react';
 import { apiFetch, ApiError } from '@/lib/api';
@@ -171,6 +172,21 @@ export default function HopitauxPage() {
     await charger();
   }
 
+  async function supprimer(h: HopitalListItem) {
+    if (
+      !confirm(
+        `Supprimer définitivement « ${h.nom} » ? (refusé s'il a des données médicales — désactivez-le plutôt)`,
+      )
+    )
+      return;
+    try {
+      await apiFetch(`/hopitaux/${h.id}`, { method: 'DELETE' });
+      await charger();
+    } catch (e) {
+      alert(e instanceof ApiError ? e.message : 'Suppression impossible.');
+    }
+  }
+
   const filtres = hopitaux.filter((h) => {
     if (filtre === 'actif' && !h.actif) return false;
     if (filtre === 'inactif' && h.actif) return false;
@@ -283,6 +299,13 @@ export default function HopitauxPage() {
                       className={`rounded-lg p-2 hover:bg-slate-50 ${h.actif ? 'text-slate-400 hover:text-rose-600' : 'text-slate-400 hover:text-emerald-600'}`}
                     >
                       <Power className="h-4 w-4" />
+                    </button>
+                    <button
+                      onClick={() => supprimer(h)}
+                      title="Supprimer (si aucune donnée)"
+                      className="rounded-lg p-2 text-slate-400 hover:bg-slate-50 hover:text-rose-600"
+                    >
+                      <Trash2 className="h-4 w-4" />
                     </button>
                   </div>
                 </div>

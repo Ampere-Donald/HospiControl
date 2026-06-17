@@ -81,6 +81,21 @@ export class CarnetService {
     };
   }
 
+  /** Les consultations créées par le médecin connecté (vue « Mes consultations »). */
+  mesConsultations(user: AuthUser) {
+    return this.prisma.consultation.findMany({
+      where: { medecinId: user.id },
+      include: {
+        prescriptions: true,
+        patient: {
+          select: { id: true, nom: true, prenom: true, telephone: true },
+        },
+      },
+      orderBy: { date: 'desc' },
+      take: 50,
+    });
+  }
+
   async ajouterAntecedent(
     patientId: string,
     dto: CreateAntecedentDto,

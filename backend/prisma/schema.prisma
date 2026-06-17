@@ -53,12 +53,13 @@ model Utilisateur {
   prenom         String
   email          String         @unique
   telephone      String?
-  motDePasseHash String
-  role           Role
-  hopitalId      String?
-  hopital        Hopital?       @relation(fields: [hopitalId], references: [id])
-  createdAt      DateTime       @default(now())
-  consultations  Consultation[]
+  motDePasseHash     String
+  role               Role
+  hopitalId          String?
+  hopital            Hopital?       @relation(fields: [hopitalId], references: [id])
+  mustChangePassword Boolean        @default(false)
+  createdAt          DateTime       @default(now())
+  consultations      Consultation[]
 }
 
 model Patient {

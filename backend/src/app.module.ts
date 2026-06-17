@@ -12,6 +12,7 @@ import { DashboardModule } from './dashboard/dashboard.module';
 import { HopitauxModule } from './hopitaux/hopitaux.module';
 import { PatientsModule } from './patients/patients.module';
 import { PrismaModule } from './prisma/prisma.module';
+import { StatsModule } from './stats/stats.module';
 import { UtilisateursModule } from './utilisateurs/utilisateurs.module';
 
 @Module({
@@ -25,6 +26,7 @@ import { UtilisateursModule } from './utilisateurs/utilisateurs.module';
     CarnetModule,
     ConsentementsModule,
     DashboardModule,
+    StatsModule,
   ],
   controllers: [AppController],
   providers: [

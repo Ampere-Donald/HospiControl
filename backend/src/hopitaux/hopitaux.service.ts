@@ -52,6 +52,7 @@ export class HopitauxService {
             telephone: dto.admin.telephone,
             role: 'ADMIN_HOPITAL',
             motDePasseHash,
+            mustChangePassword: true,
           },
         },
       },
@@ -99,5 +100,35 @@ export class HopitauxService {
   async desactiver(id: string) {
     await this.findOne(id);
     return this.prisma.hopital.update({ where: { id }, data: { actif: false } });
+  }
+
+  /** Suppression définitive — autorisée seulement si aucune donnée médicale. */
+  async supprimer(id: string) {
+    const hopital = await this.prisma.hopital.findUnique({
+      where: { id },
+      include: {
+        _count: {
+          select: {
+            patients: true,
+            consultations: true,
+            antecedents: true,
+            consentements: true,
+          },
+        },
+      },
+    });
+    if (!hopital) throw new NotFoundException('Hôpital introuvable.');
+    const c = hopital._count;
+    if (c.patients > 0 || c.consultations > 0 || c.antecedents > 0 || c.consentements > 0) {
+      throw new ConflictException(
+        'Cet hôpital a des données médicales. Désactivez-le plutôt que de le supprimer.',
+      );
+    }
+    // Aucune donnée médicale : on retire ses utilisateurs puis l'hôpital.
+    await this.prisma.$transaction([
+      this.prisma.utilisateur.deleteMany({ where: { hopitalId: id } }),
+      this.prisma.hopital.delete({ where: { id } }),
+    ]);
+    return { success: true };
   }
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Check,
@@ -73,21 +73,41 @@ export default function PatientsPage() {
   const cle = normaliserTelephone(tel);
   const valide = telephoneValide(cle);
 
-  async function rechercher() {
-    if (!valide) return;
-    setRecherche(true);
-    setResultat(null);
-    try {
-      const r = await apiFetch<RecherchePatient>(
-        `/patients/recherche?telephone=${encodeURIComponent(cle)}`,
-      );
-      setResultat(r);
-    } catch {
+  const rechercher = useCallback(
+    async (valeur?: string) => {
+      const t = valeur ?? tel;
+      const c = normaliserTelephone(t);
+      if (!telephoneValide(c)) return;
+      setRecherche(true);
       setResultat(null);
-    } finally {
-      setRecherche(false);
+      try {
+        const r = await apiFetch<RecherchePatient>(
+          `/patients/recherche?telephone=${encodeURIComponent(c)}`,
+        );
+        setResultat(r);
+        if (typeof window !== 'undefined')
+          sessionStorage.setItem('patients_tel', t);
+      } catch {
+        setResultat(null);
+      } finally {
+        setRecherche(false);
+      }
+    },
+    [tel],
+  );
+
+  // Restaure la dernière recherche quand on revient sur la page.
+  useEffect(() => {
+    const stored =
+      typeof window !== 'undefined'
+        ? sessionStorage.getItem('patients_tel')
+        : null;
+    if (stored) {
+      setTel(stored);
+      void rechercher(stored);
     }
-  }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   function ouvrirCreation() {
     setForm({ ...FORM_VIDE, telephone: tel || cle });
@@ -151,7 +171,7 @@ export default function PatientsPage() {
                 />
               </div>
               <button
-                onClick={rechercher}
+                onClick={() => rechercher()}
                 disabled={!valide || recherche}
                 className="flex items-center justify-center gap-2 rounded-lg bg-brand px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-dark disabled:opacity-50"
               >

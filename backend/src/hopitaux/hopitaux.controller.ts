@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+} from '@nestjs/common';
 import { Roles } from '../common/decorators/roles.decorator';
 import { CreateHopitalDto } from './dto/create-hopital.dto';
 import { UpdateHopitalDto } from './dto/update-hopital.dto';
@@ -32,5 +40,10 @@ export class HopitauxController {
   @Patch(':id/desactiver')
   desactiver(@Param('id') id: string) {
     return this.hopitaux.desactiver(id);
+  }
+
+  @Delete(':id')
+  supprimer(@Param('id') id: string) {
+    return this.hopitaux.supprimer(id);
   }
 }
