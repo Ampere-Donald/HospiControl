@@ -144,10 +144,11 @@ async function main() {
   // pas autorisé le partage).
   const jean = await prisma.patient.upsert({
     where: { telephone: '699112233' },
-    update: {},
+    update: { email: 'jean.nguoa@demo.cm' },
     create: {
       id: 'patient-jean',
       telephone: '699112233',
+      email: 'jean.nguoa@demo.cm',
       nom: 'Nguoa',
       prenom: 'Jean Pierre',
       dateNaissance: new Date('1984-08-12'),

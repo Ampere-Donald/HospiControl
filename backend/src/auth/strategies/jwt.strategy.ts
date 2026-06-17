@@ -28,6 +28,24 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: JwtPayload) {
+    // Jeton patient (lien magique) : on charge le Patient, pas un Utilisateur.
+    if (payload.role === 'PATIENT') {
+      const patient = await this.prisma.patient.findUnique({
+        where: { id: payload.sub },
+      });
+      if (!patient) {
+        throw new UnauthorizedException('Patient introuvable.');
+      }
+      return {
+        id: patient.id,
+        role: 'PATIENT' as const,
+        hopitalId: null,
+        nom: patient.nom,
+        prenom: patient.prenom,
+        email: patient.email ?? '',
+      };
+    }
+
     const user = await this.prisma.utilisateur.findUnique({
       where: { id: payload.sub },
       include: { hopital: true },

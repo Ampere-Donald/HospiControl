@@ -9,6 +9,7 @@ import { RolesGuard } from './auth/guards/roles.guard';
 import { CarnetModule } from './carnet/carnet.module';
 import { ConsentementsModule } from './consentements/consentements.module';
 import { DashboardModule } from './dashboard/dashboard.module';
+import { EspacePatientModule } from './espace-patient/espace-patient.module';
 import { HopitauxModule } from './hopitaux/hopitaux.module';
 import { JournalModule } from './journal/journal.module';
 import { PatientsModule } from './patients/patients.module';
@@ -29,6 +30,7 @@ import { UtilisateursModule } from './utilisateurs/utilisateurs.module';
     DashboardModule,
     StatsModule,
     JournalModule,
+    EspacePatientModule,
   ],
   controllers: [AppController],
   providers: [

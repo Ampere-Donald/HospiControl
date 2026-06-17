@@ -125,7 +125,7 @@ export interface Carnet {
   consultations: Consultation[];
 }
 
-export type StatutConsentement = 'AUTORISE' | 'REVOQUE';
+export type StatutConsentement = 'EN_ATTENTE' | 'AUTORISE' | 'REFUSE' | 'REVOQUE';
 
 /** Statut du consentement pour l'hôpital connecté (GET /patients/:id/consentement). */
 export interface ConsentementStatut {

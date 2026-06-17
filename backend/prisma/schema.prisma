@@ -12,6 +12,7 @@ enum Role {
   ADMIN_HOPITAL
   MEDECIN
   ACCUEIL
+  PATIENT
 }
 
 enum Sexe {
@@ -27,7 +28,9 @@ enum TypeAntecedent {
 }
 
 enum StatutConsentement {
+  EN_ATTENTE
   AUTORISE
+  REFUSE
   REVOQUE
 }
 
@@ -75,6 +78,7 @@ model Utilisateur {
 model Patient {
   id            String         @id @default(cuid())
   telephone     String         @unique
+  email         String?
   nom           String
   prenom        String
   dateNaissance DateTime?

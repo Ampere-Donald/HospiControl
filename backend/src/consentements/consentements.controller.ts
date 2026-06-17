@@ -14,15 +14,32 @@ export class ConsentementsController {
     return this.consentements.statut(patientId, user);
   }
 
+  /** L'hôpital demande l'accès -> EN_ATTENTE + lien magique pour le patient. */
   @Roles('ACCUEIL', 'ADMIN_HOPITAL')
-  @Post()
-  autoriser(@Param('patientId') patientId: string, @CurrentUser() user: AuthUser) {
-    return this.consentements.autoriser(patientId, user);
+  @Post('demander')
+  demander(
+    @Param('patientId') patientId: string,
+    @CurrentUser() user: AuthUser,
+  ) {
+    return this.consentements.demander(patientId, user);
+  }
+
+  /** Consentement présentiel attesté par l'accueil (patient sans email). */
+  @Roles('ACCUEIL', 'ADMIN_HOPITAL')
+  @Post('presentiel')
+  presentiel(
+    @Param('patientId') patientId: string,
+    @CurrentUser() user: AuthUser,
+  ) {
+    return this.consentements.presentiel(patientId, user);
   }
 
   @Roles('ACCUEIL', 'ADMIN_HOPITAL')
   @Patch('revoquer')
-  revoquer(@Param('patientId') patientId: string, @CurrentUser() user: AuthUser) {
+  revoquer(
+    @Param('patientId') patientId: string,
+    @CurrentUser() user: AuthUser,
+  ) {
     return this.consentements.revoquer(patientId, user);
   }
 }
