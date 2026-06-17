@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
@@ -20,6 +21,8 @@ import { UtilisateursModule } from './utilisateurs/utilisateurs.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    // Rate-limit global : 100 requêtes / minute / IP (anti-abus).
+    ThrottlerModule.forRoot([{ ttl: 60000, limit: 100 }]),
     PrismaModule,
     AuthModule,
     HopitauxModule,
@@ -35,6 +38,8 @@ import { UtilisateursModule } from './utilisateurs/utilisateurs.module';
   controllers: [AppController],
   providers: [
     AppService,
+    // Limite de débit en premier (anti brute-force).
+    { provide: APP_GUARD, useClass: ThrottlerGuard },
     // Sécurité par défaut : authentification puis autorisation sur TOUTES les routes.
     { provide: APP_GUARD, useClass: JwtAuthGuard },
     { provide: APP_GUARD, useClass: RolesGuard },

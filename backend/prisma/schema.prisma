@@ -106,7 +106,7 @@ model Consentement {
   patient          Patient            @relation(fields: [patientId], references: [id])
   hopitalId        String
   hopital          Hopital            @relation(fields: [hopitalId], references: [id])
-  statut           StatutConsentement @default(AUTORISE)
+  statut           StatutConsentement @default(EN_ATTENTE)
   dateModification DateTime           @default(now()) @updatedAt
 
   @@unique([patientId, hopitalId])
