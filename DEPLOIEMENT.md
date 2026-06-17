@@ -55,3 +55,33 @@ npx prisma db seed
 - **CORS** : l'API n'accepte que les origines listées dans `FRONTEND_URL` (séparées par des virgules) ; vide en local = toutes origines.
 - **Migrations** : `start:prod` applique automatiquement les migrations au démarrage (`prisma migrate deploy`).
 - **Secrets** : ne jamais committer un vrai `.env` ; n'utiliser les identifiants de démo qu'en dev/démo.
+- **Journaux** : aucune donnée sensible (token de lien magique, mot de passe, contenu du carnet) n'est écrite dans les logs applicatifs. Le seul `console.log` est le message de démarrage.
+
+---
+
+## 4. Sauvegardes PostgreSQL (Railway)
+
+Les données médicales sont critiques : il faut une sauvegarde régulière et vérifiée.
+
+### a. Sauvegardes managées (recommandé)
+- Sur Railway, ouvrir le service **PostgreSQL → onglet *Backups*** et activer les **sauvegardes automatiques** (snapshots quotidiens). C'est l'option la plus simple en production.
+- Vérifier périodiquement qu'un **restore** fonctionne (Railway permet de restaurer un snapshot vers une nouvelle base).
+
+### b. Sauvegarde manuelle / planifiée (`pg_dump`)
+En complément (ou si l'offre ne couvre pas les backups), exporter régulièrement la base :
+
+```bash
+# Récupérer DATABASE_URL depuis Railway (Variables du service Postgres), puis :
+pg_dump "$DATABASE_URL" --format=custom --no-owner --file "hospicontrol-$(date +%F).dump"
+```
+
+Restauration :
+
+```bash
+pg_restore --clean --no-owner --dbname "$DATABASE_URL" hospicontrol-2026-06-17.dump
+```
+
+- **Fréquence conseillée** : quotidienne, avec **rétention 7–30 jours**.
+- **Stockage** : déposer les dumps chiffrés sur un stockage externe (différent de Railway), jamais dans le dépôt Git.
+- **Automatisation** : planifier le `pg_dump` via une tâche cron (machine d'admin, GitHub Actions planifié, ou un service Railway *cron*).
+- **Test de restauration** : restaurer un dump sur une base jetable au moins une fois par mois pour garantir que les sauvegardes sont exploitables.
