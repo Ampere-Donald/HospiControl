@@ -284,7 +284,7 @@ export default function CarnetPage({
                     {!a.estPropreHopital && a.hopitalCreateur && ` · ${a.hopitalCreateur.nom}`}
                   </p>
                 </div>
-                {carnet.partageAutorise &&
+                {(carnet.partageAutorise || urgence) &&
                   (a.estPropreHopital ? (
                     <Badge tone="slate">Votre hôpital</Badge>
                   ) : (
@@ -319,7 +319,7 @@ export default function CarnetPage({
                   <div className="flex items-center gap-2">
                     <Calendar className="h-4 w-4 text-slate-400" />
                     <span className="text-sm font-medium text-slate-700">{dateLongue(c.date)}</span>
-                    {carnet.partageAutorise &&
+                    {(carnet.partageAutorise || urgence) &&
                       (c.estPropreHopital ? (
                         <Badge tone="slate">Votre hôpital</Badge>
                       ) : (

@@ -23,6 +23,7 @@ import { PageHeader } from '@/components/ui/page-header';
 import { StatCard } from '@/components/ui/stat-card';
 import { Badge } from '@/components/ui/badge';
 import { SlideOver } from '@/components/ui/slide-over';
+import { useToast } from '@/components/ui/toast';
 
 const FORM_VIDE = {
   nom: '',
@@ -37,6 +38,7 @@ const FORM_VIDE = {
 export default function HopitauxPage() {
   const { user } = useAuth();
   const router = useRouter();
+  const { toast } = useToast();
 
   const [hopitaux, setHopitaux] = useState<HopitalListItem[]>([]);
   const [chargement, setChargement] = useState(true);
@@ -181,9 +183,13 @@ export default function HopitauxPage() {
       return;
     try {
       await apiFetch(`/hopitaux/${h.id}`, { method: 'DELETE' });
+      toast(`« ${h.nom} » supprimé.`, 'success');
       await charger();
     } catch (e) {
-      alert(e instanceof ApiError ? e.message : 'Suppression impossible.');
+      toast(
+        e instanceof ApiError ? e.message : 'Suppression impossible.',
+        'error',
+      );
     }
   }
 

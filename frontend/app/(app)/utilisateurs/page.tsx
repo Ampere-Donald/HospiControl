@@ -24,6 +24,7 @@ import { Avatar } from '@/components/ui/avatar';
 import { Badge, type Tone } from '@/components/ui/badge';
 import { SlideOver } from '@/components/ui/slide-over';
 import { Field, SelectField } from '@/components/ui/field';
+import { useToast } from '@/components/ui/toast';
 
 const FORM_VIDE = {
   nomComplet: '',
@@ -41,6 +42,7 @@ function roleTone(role: Role): Tone {
 export default function UtilisateursPage() {
   const { user } = useAuth();
   const router = useRouter();
+  const { toast } = useToast();
 
   const [users, setUsers] = useState<Utilisateur[]>([]);
   const [chargement, setChargement] = useState(true);
@@ -141,9 +143,13 @@ export default function UtilisateursPage() {
     if (!confirm(`Supprimer ${u.prenom} ${u.nom} ?`)) return;
     try {
       await apiFetch(`/utilisateurs/${u.id}`, { method: 'DELETE' });
+      toast('Utilisateur supprimé.', 'success');
       await charger();
     } catch (e) {
-      alert(e instanceof ApiError ? e.message : 'Suppression impossible.');
+      toast(
+        e instanceof ApiError ? e.message : 'Suppression impossible.',
+        'error',
+      );
     }
   }
 

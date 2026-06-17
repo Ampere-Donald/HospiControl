@@ -3,6 +3,7 @@ import {
   ClipboardList,
   Globe,
   LayoutDashboard,
+  Presentation,
   Settings,
   Users,
   type LucideIcon,
@@ -34,6 +35,7 @@ export const ROLE_CONFIG: Record<Role, RoleConfig> = {
     nav: [
       { label: 'Hôpitaux', href: '/hopitaux', icon: Building2 },
       { label: 'Vue globale', href: '/vue-globale', icon: Globe },
+      { label: 'Démo guidée', href: '/demo-guidee', icon: Presentation },
       { label: 'Paramètres', href: '/parametres', icon: Settings },
     ],
   },

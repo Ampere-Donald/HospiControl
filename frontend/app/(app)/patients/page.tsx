@@ -235,6 +235,12 @@ export default function PatientsPage() {
                 {recherche ? 'Recherche…' : 'Rechercher'}
               </button>
             </div>
+            <p className="mt-2 text-xs text-slate-400">
+              💡 Le format est libre :{' '}
+              <code className="rounded bg-slate-100 px-1 font-medium text-slate-600">+237 699 11 22 33</code>{' '}
+              ={' '}
+              <code className="rounded bg-slate-100 px-1 font-medium text-slate-600">699112233</code>.
+            </p>
             {tel && (
               <div className="mt-3 flex items-center gap-2 text-xs">
                 <span className="text-slate-400">Clé normalisée :</span>
