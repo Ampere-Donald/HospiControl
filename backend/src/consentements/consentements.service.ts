@@ -4,11 +4,15 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { JournalService } from '../journal/journal.service';
 import type { AuthUser } from '../common/auth-user';
 
 @Injectable()
 export class ConsentementsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly journal: JournalService,
+  ) {}
 
   private hopitalDe(user: AuthUser): string {
     if (!user.hopitalId) {
@@ -42,21 +46,35 @@ export class ConsentementsService {
   async autoriser(patientId: string, user: AuthUser) {
     await this.patientOuErreur(patientId);
     const hopitalId = this.hopitalDe(user);
-    return this.prisma.consentement.upsert({
+    const consentement = await this.prisma.consentement.upsert({
       where: { patientId_hopitalId: { patientId, hopitalId } },
       create: { patientId, hopitalId, statut: 'AUTORISE' },
       update: { statut: 'AUTORISE' },
     });
+    void this.journal.enregistrer({
+      type: 'CONSENTEMENT_AUTORISE',
+      patientId,
+      hopitalId,
+      acteurUtilisateurId: user.id,
+    });
+    return consentement;
   }
 
   /** Révocation : l'hôpital reperd immédiatement l'accès à l'historique des autres. */
   async revoquer(patientId: string, user: AuthUser) {
     await this.patientOuErreur(patientId);
     const hopitalId = this.hopitalDe(user);
-    return this.prisma.consentement.upsert({
+    const consentement = await this.prisma.consentement.upsert({
       where: { patientId_hopitalId: { patientId, hopitalId } },
       create: { patientId, hopitalId, statut: 'REVOQUE' },
       update: { statut: 'REVOQUE' },
     });
+    void this.journal.enregistrer({
+      type: 'CONSENTEMENT_REVOQUE',
+      patientId,
+      hopitalId,
+      acteurUtilisateurId: user.id,
+    });
+    return consentement;
   }
 }

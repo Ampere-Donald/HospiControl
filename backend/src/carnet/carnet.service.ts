@@ -4,6 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { JournalService } from '../journal/journal.service';
 import type { AuthUser } from '../common/auth-user';
 import { CreateAntecedentDto } from './dto/create-antecedent.dto';
 import { CreateConsultationDto } from './dto/create-consultation.dto';
@@ -14,7 +15,10 @@ const MEDECIN_RESUME = { select: { id: true, nom: true, prenom: true } };
 
 @Injectable()
 export class CarnetService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly journal: JournalService,
+  ) {}
 
   private async patientOuErreur(patientId: string) {
     const patient = await this.prisma.patient.findUnique({
@@ -66,6 +70,13 @@ export class CarnetService {
         : { patientId, hopitalCreateurId: hopitalCourant },
       include: { hopitalCreateur: HOPITAL_RESUME },
       orderBy: { createdAt: 'desc' },
+    });
+
+    void this.journal.enregistrer({
+      type: 'LECTURE_CARNET',
+      patientId,
+      hopitalId: hopitalCourant,
+      acteurUtilisateurId: user.id,
     });
 
     return {

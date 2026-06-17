@@ -10,6 +10,7 @@ import { CarnetModule } from './carnet/carnet.module';
 import { ConsentementsModule } from './consentements/consentements.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { HopitauxModule } from './hopitaux/hopitaux.module';
+import { JournalModule } from './journal/journal.module';
 import { PatientsModule } from './patients/patients.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { StatsModule } from './stats/stats.module';
@@ -27,6 +28,7 @@ import { UtilisateursModule } from './utilisateurs/utilisateurs.module';
     ConsentementsModule,
     DashboardModule,
     StatsModule,
+    JournalModule,
   ],
   controllers: [AppController],
   providers: [

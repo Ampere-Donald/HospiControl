@@ -5,15 +5,17 @@ import {
   Building2,
   CheckCircle2,
   ClipboardList,
-  Globe,
+  History,
   ShieldCheck,
   Users,
   XCircle,
 } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
+import type { JournalAcces } from '@/lib/types';
 import { PageHeader } from '@/components/ui/page-header';
 import { StatCard } from '@/components/ui/stat-card';
 import { FullScreenLoader } from '@/components/loader';
+import { JournalList } from '@/components/journal-list';
 
 interface StatsPlateforme {
   hopitaux: number;
@@ -26,11 +28,11 @@ interface StatsPlateforme {
 
 export default function VueGlobalePage() {
   const [stats, setStats] = useState<StatsPlateforme | null>(null);
+  const [journal, setJournal] = useState<JournalAcces[]>([]);
 
   useEffect(() => {
-    apiFetch<StatsPlateforme>('/stats/plateforme')
-      .then(setStats)
-      .catch(() => {});
+    apiFetch<StatsPlateforme>('/stats/plateforme').then(setStats).catch(() => {});
+    apiFetch<JournalAcces[]>('/journal').then(setJournal).catch(() => {});
   }, []);
 
   if (!stats) return <FullScreenLoader />;
@@ -51,11 +53,14 @@ export default function VueGlobalePage() {
         <StatCard icon={XCircle} value={stats.hopitauxInactifs} label="Hôpitaux inactifs" tint="bg-slate-100 text-slate-500" />
       </div>
 
-      <div className="rounded-2xl border border-dashed border-slate-200 bg-white/60 p-6 text-center text-sm text-slate-400">
-        <Globe className="mx-auto h-6 w-6 text-slate-300" />
-        <p className="mt-2">
-          Le <strong>journal d&apos;accès</strong> (qui a consulté quel dossier, quand) s&apos;affichera ici.
-        </p>
+      {/* Journal d'accès (traçabilité — modèle Estonie) */}
+      <div className="rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div className="flex items-center gap-2 border-b border-slate-100 px-5 py-4">
+          <History className="h-4 w-4 text-brand" />
+          <h2 className="font-semibold text-slate-800">Journal d’accès</h2>
+          <span className="text-xs text-slate-400">— qui a consulté quoi, quand</span>
+        </div>
+        <JournalList entries={journal} vide="Aucun accès enregistré sur la plateforme pour le moment." />
       </div>
     </div>
   );

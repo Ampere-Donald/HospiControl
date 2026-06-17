@@ -31,6 +31,14 @@ enum StatutConsentement {
   REVOQUE
 }
 
+enum TypeAcces {
+  LECTURE_CARNET
+  DEMANDE_ACCES
+  CONSENTEMENT_AUTORISE
+  CONSENTEMENT_REVOQUE
+  ACCES_URGENCE
+}
+
 model Hopital {
   id            String         @id @default(cuid())
   nom           String
@@ -45,6 +53,7 @@ model Hopital {
   consentements Consentement[]
   antecedents   Antecedent[]
   patients      Patient[]
+  journaux      JournalAcces[]
 }
 
 model Utilisateur {
@@ -60,6 +69,7 @@ model Utilisateur {
   mustChangePassword Boolean        @default(false)
   createdAt          DateTime       @default(now())
   consultations      Consultation[]
+  journaux           JournalAcces[]
 }
 
 model Patient {
@@ -81,6 +91,7 @@ model Patient {
   antecedents       Antecedent[]
   consultations Consultation[]
   consentements Consentement[]
+  journaux      JournalAcces[]
 
   @@index([cni])
 }
@@ -133,4 +144,21 @@ model Prescription {
   posologie      String
   duree          String?
   createdAt      DateTime     @default(now())
+}
+
+model JournalAcces {
+  id                  String       @id @default(cuid())
+  type                TypeAcces
+  patientId           String
+  patient             Patient      @relation(fields: [patientId], references: [id])
+  hopitalId           String?
+  hopital             Hopital?     @relation(fields: [hopitalId], references: [id])
+  acteurUtilisateurId String?
+  acteurUtilisateur   Utilisateur? @relation(fields: [acteurUtilisateurId], references: [id])
+  acteurEstPatient    Boolean      @default(false)
+  motif               String?
+  createdAt           DateTime     @default(now())
+
+  @@index([patientId])
+  @@index([createdAt])
 }

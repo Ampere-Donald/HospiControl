@@ -165,3 +165,27 @@ export interface DashboardData {
     patient: { nom: string; prenom: string; telephone: string };
   }[];
 }
+
+export type TypeAcces =
+  | 'LECTURE_CARNET'
+  | 'DEMANDE_ACCES'
+  | 'CONSENTEMENT_AUTORISE'
+  | 'CONSENTEMENT_REVOQUE'
+  | 'ACCES_URGENCE';
+
+/** Entrée du journal d'accès (traçabilité — qui a consulté quoi, quand). */
+export interface JournalAcces {
+  id: string;
+  type: TypeAcces;
+  motif: string | null;
+  acteurEstPatient: boolean;
+  createdAt: string;
+  patient: { id: string; nom: string; prenom: string; telephone: string } | null;
+  hopital: { id: string; nom: string } | null;
+  acteurUtilisateur: {
+    id: string;
+    nom: string;
+    prenom: string;
+    role: Role;
+  } | null;
+}
