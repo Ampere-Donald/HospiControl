@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
   AlertCircle,
+  AlertTriangle,
   ArrowLeft,
   Calendar,
   ClipboardList,
@@ -74,6 +75,9 @@ export default function CarnetPage({
 
   const [envoi, setEnvoi] = useState(false);
   const [erreur, setErreur] = useState('');
+  const [urgence, setUrgence] = useState(false);
+  const [urgenceOuvert, setUrgenceOuvert] = useState(false);
+  const [urgenceMotif, setUrgenceMotif] = useState('');
 
   const charger = useCallback(async () => {
     setChargement(true);
@@ -170,6 +174,28 @@ export default function CarnetPage({
     }
   }
 
+  async function activerUrgence() {
+    if (!urgenceMotif.trim()) {
+      setErreur('Le motif est obligatoire.');
+      return;
+    }
+    setEnvoi(true);
+    setErreur('');
+    try {
+      const c = await apiFetch<Carnet>(`/patients/${id}/carnet/urgence`, {
+        method: 'POST',
+        body: JSON.stringify({ motif: urgenceMotif }),
+      });
+      setCarnet(c);
+      setUrgence(true);
+      setUrgenceOuvert(false);
+    } catch (e) {
+      setErreur(e instanceof ApiError ? e.message : 'Accès impossible.');
+    } finally {
+      setEnvoi(false);
+    }
+  }
+
   return (
     <div className="mx-auto max-w-5xl space-y-5">
       <Link
@@ -191,8 +217,17 @@ export default function CarnetPage({
         </div>
       </div>
 
-      {/* Bandeau partage (état du consentement) */}
-      {carnet.partageAutorise ? (
+      {/* Bandeau : urgence (rouge) / partage autorisé (vert) / sinon ambre + bris de glace */}
+      {urgence ? (
+        <div className="flex items-start gap-2 rounded-xl border border-rose-300 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+          <span>
+            <strong>Accès d’urgence activé (bris de glace).</strong> Vous voyez le carnet
+            <strong> complet</strong> sans consentement. Cet accès est <strong>tracé</strong> et le patient en
+            sera informé.
+          </span>
+        </div>
+      ) : carnet.partageAutorise ? (
         <div className="flex items-start gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
           <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0" />
           <span>
@@ -201,12 +236,24 @@ export default function CarnetPage({
           </span>
         </div>
       ) : (
-        <div className="flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
-          <Lock className="mt-0.5 h-4 w-4 shrink-0" />
-          <span>
-            Vous voyez uniquement les données de <strong>votre hôpital</strong>. L’accès à l’historique des autres
-            établissements nécessite le <strong>consentement du patient</strong>, enregistré par l’accueil.
+        <div className="flex flex-col gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700 sm:flex-row sm:items-center sm:justify-between">
+          <span className="flex items-start gap-2">
+            <Lock className="mt-0.5 h-4 w-4 shrink-0" />
+            <span>
+              Vous voyez uniquement les données de <strong>votre hôpital</strong>. L’accès à l’historique des
+              autres établissements nécessite le <strong>consentement du patient</strong>.
+            </span>
           </span>
+          <button
+            onClick={() => {
+              setUrgenceMotif('');
+              setErreur('');
+              setUrgenceOuvert(true);
+            }}
+            className="flex shrink-0 items-center justify-center gap-1.5 rounded-lg border border-rose-300 bg-white px-3 py-2 text-sm font-semibold text-rose-600 hover:bg-rose-50"
+          >
+            <AlertTriangle className="h-4 w-4" /> Accès d’urgence
+          </button>
         </div>
       )}
 
@@ -414,6 +461,49 @@ export default function CarnetPage({
           {erreur && (
             <div className="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600">
               <AlertCircle className="h-4 w-4 shrink-0" /> {erreur}
+            </div>
+          )}
+        </div>
+      </SlideOver>
+
+      {/* Slide-over : accès d'urgence (bris de glace) */}
+      <SlideOver
+        open={urgenceOuvert}
+        onClose={() => setUrgenceOuvert(false)}
+        title="Accès d’urgence"
+        subtitle="Bris de glace — patient hors d’état de consentir"
+        footer={
+          <div className="flex gap-3">
+            <button onClick={() => setUrgenceOuvert(false)} className="flex-1 rounded-lg border border-slate-200 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50">Annuler</button>
+            <button onClick={activerUrgence} disabled={envoi} className="flex-1 rounded-lg bg-rose-600 py-2.5 text-sm font-semibold text-white hover:bg-rose-700 disabled:opacity-60">
+              {envoi ? 'Accès…' : 'Confirmer l’accès d’urgence'}
+            </button>
+          </div>
+        }
+      >
+        <div className="space-y-4">
+          <div className="flex items-start gap-2 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2.5 text-sm text-rose-700">
+            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+            <span>
+              Réservé aux situations vitales où le patient ne peut pas donner son consentement.
+              Cet accès est <strong>tracé au journal</strong> (qui, quand, motif) et le patient en sera informé.
+            </span>
+          </div>
+          <div>
+            <label className="mb-1 block text-sm font-medium text-slate-600">
+              Motif de l’urgence <span className="text-rose-500">*</span>
+            </label>
+            <textarea
+              value={urgenceMotif}
+              onChange={(e) => setUrgenceMotif(e.target.value)}
+              rows={3}
+              placeholder="Ex. Patient inconscient admis aux urgences ; antécédents et allergies nécessaires."
+              className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-800 outline-none placeholder:text-slate-400 focus:border-rose-400 focus:ring-2 focus:ring-rose-200"
+            />
+          </div>
+          {erreur && (
+            <div className="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600">
+              <XCircle className="h-4 w-4 shrink-0" /> {erreur}
             </div>
           )}
         </div>

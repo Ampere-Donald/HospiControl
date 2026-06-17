@@ -3,6 +3,7 @@ import type { AuthUser } from '../common/auth-user';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { Roles } from '../common/decorators/roles.decorator';
 import { CarnetService } from './carnet.service';
+import { AccesUrgenceDto } from './dto/acces-urgence.dto';
 import { CreateAntecedentDto } from './dto/create-antecedent.dto';
 import { CreateConsultationDto } from './dto/create-consultation.dto';
 import { CreatePrescriptionDto } from './dto/create-prescription.dto';
@@ -18,6 +19,16 @@ export class CarnetController {
     @CurrentUser() user: AuthUser,
   ) {
     return this.carnet.getCarnet(patientId, user);
+  }
+
+  /** Bloc 2 — accès d'urgence (bris de glace) : carnet complet, motif obligatoire, tracé. */
+  @Post('patients/:patientId/carnet/urgence')
+  accesUrgence(
+    @Param('patientId') patientId: string,
+    @Body() dto: AccesUrgenceDto,
+    @CurrentUser() user: AuthUser,
+  ) {
+    return this.carnet.getCarnetUrgence(patientId, user, dto.motif);
   }
 
   @Post('patients/:patientId/antecedents')

@@ -92,6 +92,52 @@ export class CarnetService {
     };
   }
 
+  /**
+   * Bloc 2 — accès d'urgence (« bris de glace »). Patient inconscient qui ne
+   * peut pas consentir : le médecin ouvre le carnet COMPLET sans consentement,
+   * avec motif OBLIGATOIRE et traçage au journal (le patient le verra a posteriori).
+   */
+  async getCarnetUrgence(patientId: string, user: AuthUser, motif: string) {
+    await this.patientOuErreur(patientId);
+    const hopitalCourant = this.hopitalDe(user);
+
+    const consultations = await this.prisma.consultation.findMany({
+      where: { patientId },
+      include: {
+        prescriptions: true,
+        hopital: HOPITAL_RESUME,
+        medecin: MEDECIN_RESUME,
+      },
+      orderBy: { date: 'desc' },
+    });
+    const antecedents = await this.prisma.antecedent.findMany({
+      where: { patientId },
+      include: { hopitalCreateur: HOPITAL_RESUME },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    void this.journal.enregistrer({
+      type: 'ACCES_URGENCE',
+      patientId,
+      hopitalId: hopitalCourant,
+      acteurUtilisateurId: user.id,
+      motif,
+    });
+
+    return {
+      urgence: true,
+      partageAutorise: true,
+      antecedents: antecedents.map((a) => ({
+        ...a,
+        estPropreHopital: a.hopitalCreateurId === hopitalCourant,
+      })),
+      consultations: consultations.map((c) => ({
+        ...c,
+        estPropreHopital: c.hopitalId === hopitalCourant,
+      })),
+    };
+  }
+
   /** Les consultations créées par le médecin connecté (vue « Mes consultations »). */
   mesConsultations(user: AuthUser) {
     return this.prisma.consultation.findMany({
