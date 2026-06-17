@@ -25,7 +25,9 @@ export class PatientsController {
     return this.patients.rechercheParTelephone(telephone ?? '');
   }
 
-  @Roles('MEDECIN', 'ACCUEIL')
+  // Création réservée à l'accueil (enregistrement du patient à son arrivée).
+  // Le médecin, lui, recherche et lit les carnets mais ne crée pas de patient.
+  @Roles('ACCUEIL')
   @Post()
   create(@Body() dto: CreatePatientDto, @CurrentUser() user: AuthUser) {
     return this.patients.create(dto, user.hopitalId);
@@ -37,7 +39,7 @@ export class PatientsController {
     return this.patients.findOne(id);
   }
 
-  @Roles('MEDECIN', 'ACCUEIL')
+  @Roles('ACCUEIL')
   @Patch(':id')
   update(@Param('id') id: string, @Body() dto: UpdatePatientDto) {
     return this.patients.update(id, dto);

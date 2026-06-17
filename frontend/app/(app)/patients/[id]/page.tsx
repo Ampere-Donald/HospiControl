@@ -60,7 +60,8 @@ export default function FichePatientPage({
   const [envoi, setEnvoi] = useState(false);
   const [erreur, setErreur] = useState('');
 
-  const peutModifier = user?.role === 'MEDECIN' || user?.role === 'ACCUEIL';
+  // Modification de l'identité réservée à l'accueil (cohérent avec le back).
+  const peutModifier = user?.role === 'ACCUEIL';
   const estMedecin = user?.role === 'MEDECIN';
 
   const charger = useCallback(async () => {

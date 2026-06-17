@@ -15,6 +15,7 @@ import {
   XCircle,
 } from 'lucide-react';
 import { apiFetch, ApiError } from '@/lib/api';
+import { useAuth } from '@/lib/auth';
 import {
   calculerAge,
   formatTelephone,
@@ -58,6 +59,9 @@ const REGISTRE = [
 
 export default function PatientsPage() {
   const router = useRouter();
+  const { user } = useAuth();
+  // L'enregistrement d'un patient est un acte d'accueil : seul ce rôle le voit.
+  const estAccueil = user?.role === 'ACCUEIL';
 
   const [tel, setTel] = useState('');
   const [resultat, setResultat] = useState<RecherchePatient | null>(null);
@@ -67,6 +71,11 @@ export default function PatientsPage() {
   const [form, setForm] = useState(FORM_VIDE);
   const [envoi, setEnvoi] = useState(false);
   const [erreur, setErreur] = useState('');
+  // Contrôle anti-doublon en direct sur le champ téléphone du formulaire.
+  const [doublon, setDoublon] = useState<{
+    etat: 'idle' | 'checking' | 'existe' | 'libre';
+    patient?: Patient;
+  }>({ etat: 'idle' });
 
   const champ = (k: keyof typeof FORM_VIDE, v: string) =>
     setForm((f) => ({ ...f, [k]: v }));
@@ -110,6 +119,36 @@ export default function PatientsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Vérifie en direct si le numéro saisi correspond déjà à un dossier : on garde
+  // ainsi la garantie « un patient = un téléphone » tout en rendant la création visible.
+  useEffect(() => {
+    if (!ouvert) {
+      setDoublon({ etat: 'idle' });
+      return;
+    }
+    const c = normaliserTelephone(form.telephone);
+    if (!telephoneValide(c)) {
+      setDoublon({ etat: 'idle' });
+      return;
+    }
+    setDoublon({ etat: 'checking' });
+    const timer = setTimeout(async () => {
+      try {
+        const r = await apiFetch<RecherchePatient>(
+          `/patients/recherche?telephone=${encodeURIComponent(c)}`,
+        );
+        setDoublon(
+          r.trouve && r.patient
+            ? { etat: 'existe', patient: r.patient }
+            : { etat: 'libre' },
+        );
+      } catch {
+        setDoublon({ etat: 'idle' });
+      }
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [form.telephone, ouvert]);
+
   function ouvrirCreation() {
     setForm({ ...FORM_VIDE, telephone: tel || cle });
     setErreur('');
@@ -118,6 +157,10 @@ export default function PatientsPage() {
 
   async function creer() {
     setErreur('');
+    if (doublon.etat === 'existe') {
+      setErreur('Ce numéro correspond déjà à un patient existant.');
+      return;
+    }
     if (!form.telephone || !form.nom || !form.prenom) {
       setErreur('Téléphone, nom et prénom sont requis.');
       return;
@@ -151,6 +194,17 @@ export default function PatientsPage() {
       <PageHeader
         title="Patients"
         subtitle="Recherchez un patient par téléphone — dossier global, partagé entre les hôpitaux."
+        action={
+          estAccueil ? (
+            <button
+              onClick={ouvrirCreation}
+              className="flex items-center gap-2 rounded-lg bg-brand px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-brand-dark"
+            >
+              <UserPlus className="h-4 w-4" />
+              Nouveau patient
+            </button>
+          ) : null
+        }
       />
 
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
@@ -211,16 +265,24 @@ export default function PatientsPage() {
                 <UserSearch className="h-7 w-7" />
               </span>
               <h3 className="mt-4 font-semibold text-slate-800">Aucun patient trouvé</h3>
-              <p className="mt-1 text-sm text-slate-400">
-                Aucun dossier ne correspond au numéro <strong>{resultat.cle}</strong>. Vous pouvez le créer.
-              </p>
-              <button
-                onClick={ouvrirCreation}
-                className="mt-5 inline-flex items-center gap-2 rounded-lg bg-brand px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-dark"
-              >
-                <UserPlus className="h-4 w-4" />
-                Créer un patient
-              </button>
+              {estAccueil ? (
+                <>
+                  <p className="mt-1 text-sm text-slate-400">
+                    Aucun dossier ne correspond au numéro <strong>{resultat.cle}</strong>. Vous pouvez le créer.
+                  </p>
+                  <button
+                    onClick={ouvrirCreation}
+                    className="mt-5 inline-flex items-center gap-2 rounded-lg bg-brand px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-dark"
+                  >
+                    <UserPlus className="h-4 w-4" />
+                    Créer un patient
+                  </button>
+                </>
+              ) : (
+                <p className="mt-1 text-sm text-slate-400">
+                  Aucun dossier ne correspond au numéro <strong>{resultat.cle}</strong>. Demandez à l’accueil d’enregistrer ce patient.
+                </p>
+              )}
             </div>
           ) : (
             <div className="rounded-2xl border border-dashed border-slate-200 bg-white/60 p-10 text-center text-sm text-slate-400">
